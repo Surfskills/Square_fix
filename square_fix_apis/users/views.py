@@ -1,14 +1,15 @@
 from django.shortcuts import render
-
-# Create your views here.
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import IMUserSerializer
 from .models import IMUser
+from django.contrib.auth import authenticate
 
 
+
+#Registration
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def signup(request):
@@ -25,3 +26,32 @@ def signup(request):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    #User signing in
+from .serializers import IMUserSerializer
+
+from django.contrib.auth import authenticate, login
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework import status
+from .serializers import IMUserSerializer
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def user_login(request):
+    # Receive inputs and validate
+    username = request.data.get("username")
+    password = request.data.get("password")
+
+    if not username or not password:
+        return Response({"detail": "Please provide both username and password"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Authenticate the user
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        login(request, user)  # Log in the user
+        serializer = IMUserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    else:
+        return Response({"detail": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)

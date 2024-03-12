@@ -9,6 +9,7 @@ class IMUser(AbstractUser):
         ('CUSTOMER', 'SMARTPHONE OWNER'),
         ('ADMIN', 'SYSTEM ADMINISTRATOR'),
     )
+    username = models.CharField(max_length=150, unique=True)
     first_name = models.CharField(max_length=155, blank=True)
     last_name = models.CharField(max_length=155, blank=True)
     middle_name = models.CharField(max_length=155, blank=True)
