@@ -39,7 +39,7 @@ def user_login(request):
     # Authenticate the user
     user = authenticate(request, username=username, password=password)
     if user is not None:
-        login(request, user)  # Log in the user
+        # No need to call user_login function here
         serializer = IMUserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
     else:

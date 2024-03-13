@@ -7,15 +7,17 @@ from .models import Booking
 from .serializers import BookingSerializer
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def create_booking(request):
-    # Check if the authenticated user is a customer
-    if not request.user.is_customer:
-        return Response({"detail": "Only customers can create bookings."}, status=status.HTTP_403_FORBIDDEN)
+    # Retrieve the authenticated user
+    user = request.user
 
-    serializer = BookingSerializer(data=request.data)
-    if serializer.is_valid():
-        # Assign the requester (customer) to the booking
-        serializer.save(requester=request.user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # Check if the user is a customer
+    if user.user_type == 'CUSTOMER':
+        # Proceed to create booking
+        serializer = BookingSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(requester_name=user)  # Assign the user as the requester
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response({"detail": "Only customers can create bookings."}, status=status.HTTP_403_FORBIDDEN)
